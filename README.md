@@ -267,10 +267,28 @@ git add .
 git commit -m 'test husky'
 ```
 
-有 warning，可以commit的。。。
+```
+/Users/liumengge/Desktop/learn&share/engineered-configuration-demo/src/index.ts
+  1:7  warning  'testF' is assigned a value but never used  @typescript-eslint/no-unused-vars
 
-再试下：
+✖ 1 problem (0 errors, 1 warning)
+```
+warning，可以commit的。。。
+
+如何可以调整为error？修改下 eslintrc.cjs 规则：
+```json
+"rules": {
+  "prettier/prettier": "error",
+  "@typescript-eslint/no-unused-vars": ["error"]
+}
 ```
 
 ```
+/Users/liumengge/Desktop/learn&share/engineered-configuration-demo/src/index.ts
+  1:7  error  'testF' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 1 problem (1 error, 0 warnings)
+```
+
+现在控制台提示的是error而不是warning。
 
