@@ -267,3 +267,10 @@ git add .
 git commit -m 'test husky'
 ```
 
+有 warning，可以commit的。。。
+
+再试下：
+```
+
+```
+
