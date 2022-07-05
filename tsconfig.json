@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    /* Basic Options */
+    "baseUrl": ".", // 模块解析根路径，默认： tsconfig.json 所在目录
+    "rootDir": "src", // 编译解析根路径，默认： tsconfig.json 所在目录
+    "target": "ESNext", // 指定输出 ECMAScript 版本，默认：es2016
+    "module": "ESNext", // 指定输出模块规范，默认：commonjs
+    "lib": ["ESNext", "DOM"], // 编译需要包含的 API，默认： target 的默认值
+    "outDir": "dist", // 编译输出文件夹路径，默认：源文件同级目录
+    "sourceMap": true, // 启用 sourceMap，默认：false
+    "declaration": true, // 生成 .d.ts 类型文件，默认：false
+    "declarationDir": "dist/types", // .d.ts 类型文件的输出目录，默认：outDir 目录
+    /* Type-Check Options */
+    "strict": true, // 启用所有严格的类型检查选项，默认：true
+    "esModuleInterop": true, // 通过为导入内容创建命名空间，实现 CommonJS 和 ES 模块之间的互操作性，默认：true
+    "skipLibCheck": true, // 跳过导入第三方 lib 声明文件的类型检查，默认：true
+    "forceConsistentCasingInFileNames": true, // 强制在文件名中使用一致的大小写，默认：true
+    "moduleResolution": "Node", // 指定使用哪种模块解析策略，默认：classic
+  },
+  "include": ["src"] // 指定需要编译的文件，默认：当前目录下除了 exclude 之外的所有 .ts，.d.ts，.tsx 文件
+}
