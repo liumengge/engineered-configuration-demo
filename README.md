@@ -66,7 +66,7 @@ console.log(testF(1024, 28))
 
 > prettier-vscode 和 eslint-vscode 冲突，如何 prettier 和 eslint 集成？
 
-### Eslint
+## Eslint
 
 ```
 npm i eslint -D
@@ -154,7 +154,7 @@ package.json:
 npm run lint 后提示一样。
 未生效。。。
 
-### Prettier
+## Prettier
 
 > 把 prettier 集成到 eslint 的校验中
 
@@ -214,7 +214,7 @@ module.exports = {
 
 `npm run lint`：无报错，保持一致。
 
-### Husky
+## Husky
 
 Husky是干嘛的？
 
@@ -292,7 +292,7 @@ warning，可以commit的。。。
 
 现在控制台提示的是error而不是warning。再重试下commit，此时会有error提示在控制台并拦截掉commit。
 
-### Commitlint
+## Commitlint
 
 为啥需要 Commitlint ？
 
@@ -353,7 +353,7 @@ ci是啥？Angular 规范
 - revert：恢复先前的提交
 
 
-### Jest
+## Jest
 
 > 测试覆盖率100%！
 
@@ -414,7 +414,7 @@ test('The calculation result should be 996', () => {
 ```
 控制台执行`npm run test`测试配置是否生效：
 
-图片待添加：分享目录下
+![](images/jest.jpg)
 
 执行完后会生成一个coverage目录，其中包含的就是测试报告。
 
@@ -446,9 +446,11 @@ git add .
 git commit -m 'test: add unit test'
 ```
 
-### Gihub Actions
+## Gihub Actions
 
 > 通过Github Actions实现代码合并或推送到主分支，dependabot机器人升级依赖等动作，会自动触发测试和发布版本等一系列流程
+
+### 代码自动测试
 
 项目根目录创建 `.github/workflows/ci.yml` 及 `.github/workflows/cd.yml`，
 
@@ -491,5 +493,109 @@ jobs:
 ```
 git add .
 git commit -m 'ci: use github actions'
+git push
+```
+
+在项目的 github 的 Actions 可以看到对应的工作流程：
+
+![](./images/ci-1.jpg)
+![](./images/ci-2.jpg)
+
+以上完成了代码自动 lint 和 测试 流程，如何实现自动发布？
+
+### 代码自动发布
+
+1. NPM 注册账号
+2. 创建一个package
+
+发布npm包
+创建一个目录 milly-first-npm, cd 进去，创建index.js随便写点啥,，比如：
+```
+console.log('This is my first npm!')
+```
+执行`npm init -y`初始化。`npm login`输入name、password、email以及one-time password后, 执行`npm publish`控制台出现如下报错：
+```
+npm ERR! code E403
+npm ERR! 403 403 Forbidden - PUT https://registry.npmjs.org/my-first-npm - You do not have permission to publish "my-first-npm". Are you logged in as the correct user?
+npm ERR! 403 In most cases, you or one of your dependencies are requesting
+npm ERR! 403 a package version that is forbidden by your security policy.
+```
+
+原因是包名重复，改下包名重新发布，控制台提示信息如下：
+```
+npm notice name:          milly-first-npm                         
+...
++ milly-first-npm@1.0.0
+```
+表示发布成功。发布成功后邮箱也会收到成功提示邮件。
+
+再到npm官网就可以看到发布的第一个package了：
+![](images/npm-package.jpg)
+
+2. 创建 GH_TOKEN
+
+
+3. 创建 NPM_TOKEN
+
+
+4. 将 GITHUB_TOKEN 和 NPM_TOKEN 添加到 Actions secrets 中
+
+5. 创建 cd.yml 文件
+
+```yml
+name: CD
+
+on:
+  push:
+    branches:
+      - main  // 项目主分支为 main
+  pull_request:
+    branches:
+      - main
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - run: npx semantic-release
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+```
+
+6. 安装语义版本及其相关插件：
+- semantic-release：语义发版核心库
+- @semantic-release/changelog：用于自动生成changelog.md
+- @semantic-release/git：将发布时产生的更改提交回远程仓库
+
+`npm i semantic-release @semantic-release/changelog @semantic-release/git -D`
+
+7. 根目录下创建 .releaserc 文件
+
+```
+{
+  "branches": ["+([0-9])?(.{+([0-9]),x}).x", "main"],
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    "@semantic-release/changelog",
+    "@semantic-release/github",
+    "@semantic-release/npm",
+    "@semantic-release/git"
+  ]
+}
+```
+8. 创建分支 develop 并提交工作内容
+
+```
+git checkout -b develop
+git add .
+git commit -m 'feat: complete the CI/CD workflow'
+git push --set-upstream origin develop
 git push
 ```
