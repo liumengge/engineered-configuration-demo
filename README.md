@@ -416,6 +416,8 @@ test('The calculation result should be 996', () => {
 
 图片待添加：分享目录下
 
+执行完后会生成一个coverage目录，其中包含的就是测试报告。
+
 给 `__test__` 目录也加上 lint 校验。修改package.json：
 
 ```js
@@ -444,6 +446,50 @@ git add .
 git commit -m 'test: add unit test'
 ```
 
+### Gihub Actions
 
+> 通过Github Actions实现代码合并或推送到主分支，dependabot机器人升级依赖等动作，会自动触发测试和发布版本等一系列流程
 
+项目根目录创建 `.github/workflows/ci.yml` 及 `.github/workflows/cd.yml`，
 
+ci.yml: 持续集成
+```yml
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+      - run: npm ci
+      - run: npm run lint
+  tests:
+    needs: linter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+      - run: npm ci
+      - run: npm run test
+```
+监听所有分支的 push 和 pull_request 动作，自动执行 linter 和tests 任务。
+
+测试配置是否生效：
+
+```
+git add .
+git commit -m 'ci: use github actions'
+git push
+```
