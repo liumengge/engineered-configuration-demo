@@ -599,3 +599,11 @@ git commit -m 'feat: complete the CI/CD workflow'
 git push --set-upstream origin develop
 git push
 ```
+
+将 develop 分支合并到主分支：
+```
+git checkout main
+git merge develop
+git push
+```
+该提交会自动触发测试并 发布版本 ，自动创建 tag 和 changelog
