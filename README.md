@@ -290,5 +290,160 @@ warning，可以commit的。。。
 ✖ 1 problem (1 error, 0 warnings)
 ```
 
-现在控制台提示的是error而不是warning。
+现在控制台提示的是error而不是warning。再重试下commit，此时会有error提示在控制台并拦截掉commit。
+
+### Commitlint
+
+为啥需要 Commitlint ？
+
+> 有利于在生成 changelog 文件和语义发版中需要提取 commit 中的信息；利于其他同学分析你提交的代码
+
+安装 Commitlint
+
+- `@commitlint/config-conventional`：
+- `@commitlint/cli`：Commitlint 命令行工具
+
+
+`npm i @commitlint/config-conventional @commitlint/cli -D`
+
+将 commitlint 添加到钩子：
+`npx husky add .husky/commit-msg 'npx --no-install commitlint --edit "$1"'`
+
+创建 `.commitlintrc` ：
+
+```
+{
+  "extends": [
+    "@commitlint/config-conventional"
+  ]
+}
+```
+
+测试钩子是否生效，index.ts:
+```js
+const testF = (a: number, b: number) => {
+  return a - b
+}
+
+console.log(testF(1024, 28))
+```
+
+后台系统开发commit规范并没有被引入进来，当前完成需求commit的信息是根据个人喜好来的。比如：
+```sh
+git add .
+git commit -m 'add eslint and commitlint'
+```
+
+规范：
+```sh
+git commit -m 'ci: add eslint and commitlint'
+```
+
+ci是啥？Angular 规范
+- feat：新功能
+- fix：修补 BUG
+- docs：修改文档，比如 README, CHANGELOG, CONTRIBUTE 等等
+- style：不改变代码逻辑 (仅仅修改了空格、格式缩进、逗号等等)
+- refactor：重构（既不修复错误也不添加功能）
+- perf：优化相关，比如提升性能、体验
+- test：增加测试，包括单元测试、集成测试等
+- build：构建系统或外部依赖项的更改
+- ci：自动化流程配置或脚本修改
+- chore：非 src 和 test 的修改，发布版本等
+- revert：恢复先前的提交
+
+
+### Jest
+
+> 测试覆盖率100%！
+
+安装 jest 和 类型声明 @types/jest ，其执行需要 ts-node 和 ts-jest 
+
+ts-node 版本：v9.1.1？
+
+`npm i jest @types/jest ts-node ts-jest -D`
+
+初始化配置文件`npx jest --init`
+
+```
+✔ Would you like to use Jest when running "test" script in "package.json"? … yes
+✔ Would you like to use Typescript for the configuration file? … yes
+✔ Choose the test environment that will be used for testing › node
+✔ Do you want Jest to add coverage reports? … yes
+✔ Which provider should be used to instrument code for coverage? › babel
+✔ Automatically clear mock calls, instances, contexts and results before every test? … yes
+```
+
+package.json:
+```json
+"scripts": {
+  "dev": "tsc --watch",
+  "clean": "rm -rf dist",
+  "build": "npm run clean && tsc",
+  "lint": "eslint src --ext .js,.ts --cache --fix",
+  "prepare": "husky install",
+  "test": "jest"
+},
+```
+
+修改生成的 jest.config.ts 文件：
+```js
+{
+  preset: 'ts-jest'
+}
+```
+
+创建测试目录 `__tests__` 和 测试文件 `__tests__/testF.spec.ts`。
+
+index.ts:
+```js
+const testF = (a: number, b: number) => {
+  return a - b
+}
+
+export default testF
+```
+
+testF.spec.ts 文件中写入测试代码：
+```js
+import testF from '../src'
+
+test('The calculation result should be 996', () => {
+  expect(testF(1024, 28)).toBe(996)
+})
+```
+控制台执行`npm run test`测试配置是否生效：
+
+图片待添加：分享目录下
+
+给 `__test__` 目录也加上 lint 校验。修改package.json：
+
+```js
+"lint": "eslint src __tests__ --ext .js,.ts --cache --fix",
+```
+
+此时，直接执行 `npm run lint` 将会报错，提示 `__tests__` 文件夹没有包含在 `tsconfig.json` 的 `include` 中，当添加到include之后，输出的dist中就会包含测试相关的文件，这并不是想要的效果。使用typescript-eslint官方给出的解决方案：
+
+新建一个tsconfig.eslint.json文件：
+```json
+{
+  "extends": "./tsconfig.json",
+  "include": ["**/*.ts", "**/*.js"]
+}
+```
+
+.eslintrc.cjs：
+```js
+"project": "./tsconfig.eslint.json"
+```
+
+验证配置是否生效：
+
+```
+git add .
+git commit -m 'test: add unit test'
+```
+
+
+
 

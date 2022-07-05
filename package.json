@@ -9,8 +9,9 @@
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
     "build": "npm run clean && tsc",
-    "lint": "eslint src --ext .js,.ts --cache --fix",
-    "prepare": "husky install"
+    "lint": "eslint src __tests__ --ext .js,.ts --cache --fix",
+    "prepare": "husky install",
+    "test": "jest"
   },
   "publishConfig": {
     "access": "public"
@@ -27,6 +28,9 @@
   },
   "homepage": "https://github.com/liumengge/engineered-configuration-demo#readme",
   "devDependencies": {
+    "@commitlint/cli": "^17.0.3",
+    "@commitlint/config-conventional": "^17.0.3",
+    "@types/jest": "^28.1.4",
     "@typescript-eslint/eslint-plugin": "^5.30.5",
     "@typescript-eslint/parser": "^5.30.5",
     "eslint": "^8.19.0",
@@ -36,7 +40,10 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-vue": "^9.1.1",
     "husky": "^8.0.1",
+    "jest": "^28.1.2",
     "prettier": "^2.7.1",
+    "ts-jest": "^28.0.5",
+    "ts-node": "^10.8.2",
     "typescript": "^4.7.4"
   }
 }
