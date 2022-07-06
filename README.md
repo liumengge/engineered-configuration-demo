@@ -607,3 +607,30 @@ git merge develop
 git push
 ```
 该提交会自动触发测试并 发布版本 ，自动创建 tag 和 changelog
+
+切回 develop 分支，创建一个自动更新依赖的workflow：
+
+dependabot.yml:
+```yml
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: 'npm'
+    # Look for `package.json` and `lock` files in the `root` directory
+    directory: '/'
+    # Check the npm registry for updates every day (weekdays)
+    schedule:
+      interval: 'weekly'
+```
+
+提交并查看 workflows 是否全部通过，再合并到 主分支 并提交，这个提交不会触发版本发布：
+```sh
+git pull origin main
+git add .
+git commit -m 'ci: add dependabot'
+git push 
+
+git checkout main
+git merge develop
+git push
+```
