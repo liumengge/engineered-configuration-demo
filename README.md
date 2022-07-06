@@ -1,7 +1,16 @@
 # engineered-configuration-demo
 
-macOS
-node -v  => 14.18.1
+> 目前为止，接触到的团队项目中后台管理系统像 webpack 的相关配置已经被大佬封装起来了，前台项目中会看到非常多的工程化配置文件，然而这些配置文件在项目搭建阶段基本上已经被大佬们按需配置好了，做起需求来也并不涉及这些工程化配置。但是详细学习前端工程化还是很有必要的，如果接手团队中历史遗留的老项目需要去重构然后实现前后端分离，那这些工程化配置如何做能将前端项目拆分出来并实现前端独立打包构建部署？接下来，本篇文章就通过一个 demo 逐步学习下如何做一个比较完整的前端工程化配置。
+
+## 项目初始化
+
+1. demo 环境：node 14.18.1
+2. Gihutb 创建 repo
+3. clone到本地，执行`npm init -y`初始化
+4. 使用ESM规范，即 package.jso n中设置 type 为 module
+5. 安装ts相关依赖：`npm i typescript -D`
+6. 执行`npx tsc --init`初始化 tsconfig.json
+
 ## tsconfig.json配置
 
 ```json
@@ -46,8 +55,7 @@ node -v  => 14.18.1
 }
 ```
 
-测试：
-index.ts:
+现在验证下配置是否成功，index.ts:
 ```js
 const testF = (a: number, b:number) => {
   return a - b
@@ -56,23 +64,17 @@ const testF = (a: number, b:number) => {
 console.log(testF(1024, 28))
 ```
 
-执行：npm run build && node dist/index.js
-
-预期结果：在 dist 目录中生成 types/index.d.ts、index.js、index.js.map，并打印 996
+执行：`npm run build && node dist/index.js`，预期结果是在 dist 目录中生成 types/index.d.ts、index.js、index.js.map，并打印 996。
 
 ## Eslint & Prettier
 
-> 使用 Prettier 解决代码格式问题，使用 linters 解决代码质量问题
+> 使用 Prettier 解决代码格式问题，使用 Linters 解决代码质量问题，prettier-vscode 和 eslint-vscode 存在冲突，如何 prettier 和 eslint 集成？
 
-> prettier-vscode 和 eslint-vscode 冲突，如何 prettier 和 eslint 集成？
+### Eslint
 
-## Eslint
-
-```
-npm i eslint -D
-npx eslint --init  // 利用 eslint 的命令行工具生成基本配置
-```
-一路按照提示安装：
+1. 安装 eslint：`npm i eslint -D`
+2. 利用 eslint 的命令行工具生成基本配置：`npx eslint --init`
+3. 一路按照提示安装，控制台提示如下：
 ```
 ✔ How would you like to use ESLint? · problems
 ✔ What type of modules does your project use? · esm
@@ -87,7 +89,7 @@ eslint-plugin-vue@latest @typescript-eslint/eslint-plugin@latest @typescript-esl
 ✔ Which package manager do you want to use? · npm
 ```
 
-.eslintrc.cjs文件：
+可以看到生成的`.eslintrc.cjs` 文件：
 ```js
 module.exports = {
   "env": {
@@ -114,11 +116,10 @@ module.exports = {
 }
 ```
 
-为什么生成的配置文件名称是.eslintrc.cjs而不是.eslintrc.js？
+> 为什么生成的配置文件后缀是`.cjs`而不是`.js`？
+> 因为项目使用了ESM规范，`npx eslint --init`会自动识别 type，并生成兼容的配置文件名称，如果改回 .js 结尾，再尝试运行 eslint 会报错。出现这个现象是因为 eslint 内部使用了`require()`读取配置。这个情况也适用于其他功能的配置，比如后面的 Prettier、Commitlint等，配置文件都不能以 xx.js 结尾，而要改为当前库支持的其他配置文件格式，如：`.xxrc、.xxrc.json、.xxrc.yml`。
 
-因为将项目定义为ESM，`eslit --init`会自动识别 type，并生成兼容的配置文件名称，如果我们改回 .js 结尾，再运行 eslint 将会报错。出现这个问题是eslint内部使用了 `require()` 语法读取配置。这个问题也适用于其他功能的配置，比如后面的 Prettier、Commitlint等，配置文件都不能以 xx.js 结尾，而要改为当前库支持的其他配置文件格式，如：.xxrc、.xxrc.json、.xxrc.yml。
-
-验证配置是否生效：
+验证配置是否成功，index.ts：
 ```js
 const testF = (a: number, b:number) => {
   return a - b
@@ -139,32 +140,22 @@ package.json:
 
 执行`npm run lint`：
 ```
-/Users/liumengge/Desktop/learn&share/engineered-configuration-demo/src/index.ts
+/Users/xxx/Desktop/learn&share/engineered-configuration-demo/src/index.ts
   1:7  warning  'testF' is assigned a value but never used  @typescript-eslint/no-unused-vars
 
 ✖ 1 problem (0 errors, 1 warning)
 ```
+检测成功。
 
-校验成功。
-
-因为是 Typescript 项目所以要添加 Standard 规范提供的 TypeScrip 扩展配置
-
-`npm i eslint-config-standard-with-typescript -D`
-
-npm run lint 后提示一样。
-未生效。。。
-
-## Prettier
+### Prettier
 
 > 把 prettier 集成到 eslint 的校验中
 
-```
-npm i prettier -D
-echo {}> .prettierrc.json
-```
+1. 安装依赖：`npm i prettier -D`
+2. 创建基础配置文件：`echo {}> .prettierrc.json`
 
-.prettierrc.json: 只需要添加和所选规范冲突的部分
-```
+.prettierrc.json中只需要添加和所选规范冲突的部分
+```js
 {
   "semi": false, // 是否使用分号
   "singleQuote": true, // 使用单引号代替双引号
@@ -172,33 +163,14 @@ echo {}> .prettierrc.json
 }
 ```
 
-安装解决冲突需要的2个依赖：
-
-eslint-config-prettier 关闭可能与 prettier 冲突的规则
-eslint-plugin-prettier 使用 prettier 代替 eslint 格式化
-
-`npm i eslint-config-prettier eslint-plugin-prettier -D`
+3. 安装解决冲突需要的2个依赖：`npm i eslint-config-prettier eslint-plugin-prettier -D`
+   1. eslint-config-prettier：关闭可能与 prettier 冲突的规则
+   2. eslint-plugin-prettier：使用 prettier 代替 eslint 格式化
 
 .eslintrc.cjs:
 ```js
 module.exports = {
-  "env": {
-    "browser": true,
-    "es2021": true,
-    "node": true
-  },
-  "extends": [
-    "eslint:recommended",
-    "plugin:vue/vue3-essential",
-    "plugin:@typescript-eslint/recommended",
-    "prettier"
-  ],
-  "parserOptions": {
-    "ecmaVersion": "latest",
-    "parser": "@typescript-eslint/parser",
-    "sourceType": "module",
-    "project": "./tsconfig.json"
-  },
+  // ...
   "plugins": [
     "vue",
     "@typescript-eslint",
@@ -210,37 +182,22 @@ module.exports = {
 }
 ```
 
-验证配置是否成功 ？
-
-`npm run lint`：无报错，保持一致。
+`npm run lint`
 
 ## Husky
 
-Husky是干嘛的？
+> Husky是干嘛的？一个项目通常是团队合作，不能保证每个人在提交代码之前执行一遍 lint 校验，为了加强团队代码规范，可以借助 Husky + git hooks 来自动化校验，校验不通过时禁止提交。
 
-一个项目通常是团队合作，不能保证每个人在提交代码之前执行一遍 lint 校验，所以需要 git hooks 来自动化校验的过程，否则禁止提交
-
-安装：
-```
-npm i husky -D
-npx husky install
-```
-
-生成 .husky 目录。在每次执行npm install时自动启用 husky。
-
-package.json中添加：
+1. 安装 husky：`npm i husky -D`
+2. 生成 .husky：`npx husky install`，在每次执行`npm install`时会自动启用 husky
+3. package.json中添加husky：
 ```json
 "scripts": {
-  "dev": "tsc --watch",
-  "clean": "rm -rf dist",
-  "build": "npm run clean && tsc",
-  "lint": "eslint src --ext .js,.ts --cache --fix",
+  // ...
   "prepare": "husky install"
 }
 ```
-
-添加一个 lint 钩子：
-`npx husky add .husky/pre-commit "npm run lint"`
+3. 添加一个 lint 钩子：`npx husky add .husky/pre-commit "npm run lint"`
 
 也可以直接在 .husky/pre-commit 文件中写入如下内容：
 ```sh
@@ -249,10 +206,9 @@ package.json中添加：
 
 npm run lint
 ```
+表示在commit之前执行lint操作。
 
-测试是否生效：
-
-修改 index.ts 文件内容：
+4. 测试是否生效，修改 index.ts 文件内容：
 ```js
 const testF = (a: number, b: number): number => {
   return a - b
@@ -266,25 +222,25 @@ const testF = (a: number, b: number): number => {
 git add .
 git commit -m 'test husky'
 ```
-
+会看到控制台有如下提示信息：
 ```
-/Users/liumengge/Desktop/learn&share/engineered-configuration-demo/src/index.ts
+/Users/xxx/Desktop/learn&share/engineered-configuration-demo/src/index.ts
   1:7  warning  'testF' is assigned a value but never used  @typescript-eslint/no-unused-vars
 
 ✖ 1 problem (0 errors, 1 warning)
 ```
 warning，可以commit的。。。
 
-如何可以调整为error？修改下 eslintrc.cjs 规则：
+如何可以调整为error？可以修改下 eslintrc.cjs 规则：
 ```json
 "rules": {
   "prettier/prettier": "error",
   "@typescript-eslint/no-unused-vars": ["error"]
 }
 ```
-
+此时控制台提示信息为：
 ```
-/Users/liumengge/Desktop/learn&share/engineered-configuration-demo/src/index.ts
+/Users/xxx/Desktop/learn&share/engineered-configuration-demo/src/index.ts
   1:7  error  'testF' is assigned a value but never used  @typescript-eslint/no-unused-vars
 
 ✖ 1 problem (1 error, 0 warnings)
@@ -294,32 +250,24 @@ warning，可以commit的。。。
 
 ## Commitlint
 
-为啥需要 Commitlint ？
+> 不是已经有Husky把关了吗，为啥需要 Commitlint ？有啥区别？
+> Commitlint 的作用主要是有利于在生成 changelog 文件和语义发版中需要提取 commit 信息，另一方面也有利于其他同学分析自己提交的代码
 
-> 有利于在生成 changelog 文件和语义发版中需要提取 commit 中的信息；利于其他同学分析你提交的代码
+1. 安装 Commitlint：`npm i @commitlint/config-conventional @commitlint/cli -D`
 
-安装 Commitlint
-
-- `@commitlint/config-conventional`：
+- `@commitlint/config-conventional`：是基于 Angular 的约定规范
 - `@commitlint/cli`：Commitlint 命令行工具
 
-
-`npm i @commitlint/config-conventional @commitlint/cli -D`
-
-将 commitlint 添加到钩子：
-`npx husky add .husky/commit-msg 'npx --no-install commitlint --edit "$1"'`
-
-创建 `.commitlintrc` ：
-
-```
+2. 将 commitlint 添加到钩子：`npx husky add .husky/commit-msg 'npx --no-install commitlint --edit "$1"'`
+3. 创建 `.commitlintrc` ：
+```js
 {
   "extends": [
     "@commitlint/config-conventional"
   ]
 }
 ```
-
-测试钩子是否生效，index.ts:
+4. 测试钩子是否生效，index.ts:
 ```js
 const testF = (a: number, b: number) => {
   return a - b
@@ -328,7 +276,7 @@ const testF = (a: number, b: number) => {
 console.log(testF(1024, 28))
 ```
 
-后台系统开发commit规范并没有被引入进来，当前完成需求commit的信息是根据个人喜好来的。比如：
+当前后台管理系统开发 commit 规范并没有被引入进来，完成需求后commit的信息是根据个人喜好来的。比如：
 ```sh
 git add .
 git commit -m 'add eslint and commitlint'
@@ -339,7 +287,7 @@ git commit -m 'add eslint and commitlint'
 git commit -m 'ci: add eslint and commitlint'
 ```
 
-ci是啥？Angular 规范
+ci是啥？Angular 规范中的相关内容：
 - feat：新功能
 - fix：修补 BUG
 - docs：修改文档，比如 README, CHANGELOG, CONTRIBUTE 等等
@@ -357,14 +305,8 @@ ci是啥？Angular 规范
 
 > 测试覆盖率100%！
 
-安装 jest 和 类型声明 @types/jest ，其执行需要 ts-node 和 ts-jest 
-
-ts-node 版本：v9.1.1？
-
-`npm i jest @types/jest ts-node ts-jest -D`
-
-初始化配置文件`npx jest --init`
-
+1. 安装 jest 和 类型声明 @types/jest，以及执行需要的 ts-node 和 ts-jest：`npm i jest @types/jest ts-node ts-jest -D`
+2. 初始化配置文件：`npx jest --init`，一路操作之后：
 ```
 ✔ Would you like to use Jest when running "test" script in "package.json"? … yes
 ✔ Would you like to use Typescript for the configuration file? … yes
@@ -373,30 +315,24 @@ ts-node 版本：v9.1.1？
 ✔ Which provider should be used to instrument code for coverage? › babel
 ✔ Automatically clear mock calls, instances, contexts and results before every test? … yes
 ```
-
-package.json:
+3. package.json加入test:
 ```json
 "scripts": {
-  "dev": "tsc --watch",
-  "clean": "rm -rf dist",
-  "build": "npm run clean && tsc",
-  "lint": "eslint src --ext .js,.ts --cache --fix",
-  "prepare": "husky install",
+  // ...
   "test": "jest"
 },
 ```
-
-修改生成的 jest.config.ts 文件：
+4. 修改生成的 jest.config.ts 文件：
 ```js
 {
   preset: 'ts-jest'
 }
 ```
 
-创建测试目录 `__tests__` 和 测试文件 `__tests__/testF.spec.ts`。
-
-index.ts:
+5. 创建测试目录 `__tests__` 和 测试文件 `__tests__/testF.spec.ts`。
+6. 测试配置是否生效:
 ```js
+// index.ts
 const testF = (a: number, b: number) => {
   return a - b
 }
@@ -408,7 +344,7 @@ testF.spec.ts 文件中写入测试代码：
 ```js
 import testF from '../src'
 
-test('The calculation result should be 996', () => {
+test('The result should be 996', () => {
   expect(testF(1024, 28)).toBe(996)
 })
 ```
@@ -416,17 +352,21 @@ test('The calculation result should be 996', () => {
 
 ![](images/jest.jpg)
 
-执行完后会生成一个coverage目录，其中包含的就是测试报告。
+执行完后会生成一个coverage目录，其中包含有测试报告。
 
-给 `__test__` 目录也加上 lint 校验。修改package.json：
+7. 给 `__test__` 目录加上 lint 校验
 
+修改package.json：
 ```js
-"lint": "eslint src __tests__ --ext .js,.ts --cache --fix",
+"scripts": {
+  // ...
+  "lint": "eslint src __tests__ --ext .js,.ts --cache --fix",
+},
 ```
 
-此时，直接执行 `npm run lint` 将会报错，提示 `__tests__` 文件夹没有包含在 `tsconfig.json` 的 `include` 中，当添加到include之后，输出的dist中就会包含测试相关的文件，这并不是想要的效果。使用typescript-eslint官方给出的解决方案：
+此时，直接执行 `npm run lint` 将会报错，提示 `__tests__` 文件夹没有包含在 `tsconfig.json` 的 `include` 中，若添加到 include，输出的 dist 中就会包含测试相关的文件，实际上 dist 目录中并不需要测试文件。可以使用`typescript-eslint`官方给出的解决方案：
 
-新建一个tsconfig.eslint.json文件：
+新建一个 tsconfig.eslint.json 文件：
 ```json
 {
   "extends": "./tsconfig.json",
@@ -440,15 +380,14 @@ test('The calculation result should be 996', () => {
 ```
 
 验证配置是否生效：
-
 ```
 git add .
 git commit -m 'test: add unit test'
 ```
-
+dist 目录中未包含测试代码，配置可正常生效。
 ## Gihub Actions
 
-> 通过Github Actions实现代码合并或推送到主分支，dependabot机器人升级依赖等动作，会自动触发测试和发布版本等一系列流程
+> 通过 Github Actions 实现代码合并或推送到主分支，dependabot机器人升级依赖等动作，会自动触发测试和发布版本等一系列流程
 
 ### 代码自动测试
 
@@ -486,17 +425,14 @@ jobs:
       - run: npm ci
       - run: npm run test
 ```
-监听所有分支的 push 和 pull_request 动作，自动执行 linter 和tests 任务。
-
-测试配置是否生效：
-
+监听所有分支的 push 和 PR 动作，自动执行 linter 和 tests 任务。接下来，测试配置是否生效：
 ```
 git add .
 git commit -m 'ci: use github actions'
 git push
 ```
 
-在项目的 github 的 Actions 可以看到对应的工作流程：
+在 repo 的 github 的 Actions 可以看到对应的工作流程：
 
 ![](./images/ci-1.jpg)
 ![](./images/ci-2.jpg)
@@ -505,15 +441,16 @@ git push
 
 ### 代码自动发布
 
-1. NPM 注册账号
+1. [NPM](https://www.npmjs.com/) 官网注册一个账号，注册流程比较常规，这里不贴详细内容了，记录下自己的name、password、email，后续 npm login 的时候会用
 2. 创建一个package
 
-发布npm包
 创建一个目录 milly-first-npm, cd 进去，创建index.js随便写点啥,，比如：
-```
+```js
 console.log('This is my first npm!')
 ```
-执行`npm init -y`初始化。`npm login`输入name、password、email以及one-time password后, 执行`npm publish`控制台出现如下报错：
+执行`npm init -y`进行初始化。
+
+`npm login`输入name、password、email以及one-time password后, 执行`npm publish`控制台出现如下报错：
 ```
 npm ERR! code E403
 npm ERR! 403 403 Forbidden - PUT https://registry.npmjs.org/my-first-npm - You do not have permission to publish "my-first-npm". Are you logged in as the correct user?
@@ -527,20 +464,25 @@ npm notice name:          milly-first-npm
 ...
 + milly-first-npm@1.0.0
 ```
-表示发布成功。发布成功后邮箱也会收到成功提示邮件。
+表示发布成功。
 
 再到npm官网就可以看到发布的第一个package了：
 ![](images/npm-package.jpg)
 
-2. 创建 GH_TOKEN
+3. [创建 GH_TOKEN](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)：
+权限选择 repo 和 workflow 权限
 
+![](./images/github-action-1.jpg)
 
-3. 创建 NPM_TOKEN
+4. [创建 NPM_TOKEN](https://docs.npmjs.com/creating-and-viewing-access-tokens)：权限类型选择 Automation
 
+![](images/github-action-2.jpg)
 
-4. 将 GITHUB_TOKEN 和 NPM_TOKEN 添加到 Actions secrets 中
+5. 将 GH_TOKEN 和 NPM_TOKEN 添加到 repo 的 Actions secrets 中
 
-5. 创建 cd.yml 文件
+![](images/token-1.jpg)
+
+6. 创建 持续部署配置文件 cd.yml
 
 ```yml
 name: CD
@@ -568,18 +510,16 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
 
-6. 安装语义版本及其相关插件：
-- semantic-release：语义发版核心库
-- @semantic-release/changelog：用于自动生成changelog.md
-- @semantic-release/git：将发布时产生的更改提交回远程仓库
-
-`npm i semantic-release @semantic-release/changelog @semantic-release/git -D`
+6. 安装语义版本及其相关插件：`npm i semantic-release @semantic-release/changelog @semantic-release/git -D`
+- `semantic-release`：语义发版核心库
+- `@semantic-release/changelog`：用于自动生成changelog
+- `@semantic-release/git`：将发布时产生的更改提交回远程仓库
 
 7. 根目录下创建 .releaserc 文件
 
-```
+```json
 {
-  "branches": ["+([0-9])?(.{+([0-9]),x}).x", "main"],
+  "branches": ["+([0-9])?(.{+([0-9]),x}).x", "main"], // 现在 github repo 的主分支为 main
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
@@ -590,9 +530,9 @@ jobs:
   ]
 }
 ```
-8. 创建分支 develop 并提交工作内容
+8. 创建分支 develop 并提交内容
 
-```
+```sh
 git checkout -b develop
 git add .
 git commit -m 'feat: complete the CI/CD workflow'
@@ -601,16 +541,18 @@ git push
 ```
 
 将 develop 分支合并到主分支：
-```
+```sh
 git checkout main
 git merge develop
 git push
 ```
-该提交会自动触发测试并 发布版本 ，自动创建 tag 和 changelog
+该提交会自动触发 测试 并 发布版本 ，自动创建 tag 和 changelog，可以看到 Github 主页和 NPM package 主页都有相关发布：
+![](images/cd-3.jpg)
+![](images/cd-1.jpg)
 
-切回 develop 分支，创建一个自动更新依赖的workflow：
+其中，NPM上的 package 包名称与项目 package.json 中 name 一致。
 
-dependabot.yml:
+9. 切回 develop 分支，创建一个自动更新依赖的workflow：dependabot.yml
 ```yml
 version: 2
 updates:
@@ -618,9 +560,9 @@ updates:
   - package-ecosystem: 'npm'
     # Look for `package.json` and `lock` files in the `root` directory
     directory: '/'
-    # Check the npm registry for updates every day (weekdays)
+    # Check the npm registry for updates every day
     schedule:
-      interval: 'weekly'
+      interval: 'daily'
 ```
 
 提交并查看 workflows 是否全部通过，再合并到 主分支 并提交，这个提交不会触发版本发布：
@@ -634,3 +576,21 @@ git checkout main
 git merge develop
 git push
 ```
+![](images/dependabot-1.jpg)
+
+在 Github Actions 最开始就出现了 `dependabot机器人升级依赖` 的字样，所以，Dependabot 是什么？干什么的？首先，在 repo 的 Setting-Security 部分可以找到 Dependabot：
+![](images/dependabot-3.jpg)
+
+里面有详细的文档去解释什么是Dependabot。我觉得简单理解就是在做check，主要提供以下3项能力：
+- Detection of vulnerable dependencies send Dependabot alert：Dependabot 会检测 vulnerable dependencies，如果有就发出 Dependabot alert，就是下图提示的这样: ![](images/dependabot-2.jpg)该项检测被触发的情况有3种：
+  - [GitHub Advisory Database](https://github.com/advisories) 新增 vulnerability 时会被触发(GitHub Advisory Database 是 Github 提供的一个用于开源项目漏洞检测的页面)
+  - WhiteSource Database 中有 vulnerability 新增时被触发 (WhiteSource DB 与 GitHub Advisory DB 类似）
+  - repo 中添加了新的依赖，或者升级了某一个依赖的版本，或者依赖图发生了改变时被触发
+- Stop using vulnerable dependencies and keep security updates: 这是启用 Dependabot security updates 后提供的能力，会找到没有漏洞的版本将漏洞修复掉然后给 repo 提一个PR，以实现自动 security updates。如果要实现自动修复，除了要在 Github 将 Dependabot security updates 功能 enable，还需要在项目的`.github/dependabot.yml`中制定配置项，主要指定哪些漏洞需要自动修复以及多久执行一次自动修复(参照上述 dependabot.yml 配置的内容)。
+- Keep all your dependencies updated：Dependabot 除了可以处理漏洞，还可以检测所使用的依赖中是否有可以更新的版本，如果有，就实现自动更新，所以在 repo 中启用了 Dependabot 之后，就可以保证 repo 中使用的依赖都是最新的。
+
+回到本demo相关的操作，第9步的git操作不会触发版本发布，那什么情况下是可以触发的？
+- push 和 PR 到主分支上时触发版本发布
+- commit 前缀为feat、fix、perf会触发发布，否则跳过
+
+在整个配置过程中有多次提到PR，到底什么是PR？
