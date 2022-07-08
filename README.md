@@ -1,25 +1,26 @@
 # engineered-configuration-demo
 
-> 目前为止，接触到的团队项目中后台管理系统像 webpack 的相关配置已经被大佬封装起来了，前台项目中会看到非常多的工程化配置文件，然而这些配置文件在项目搭建阶段基本上已经被大佬们按需配置好了，做起需求来也并不涉及这些工程化配置。但是详细学习前端工程化还是很有必要的，如果接手团队中历史遗留的老项目需要去重构然后实现前后端分离，那这些工程化配置如何做能将前端项目拆分出来并实现前端独立打包构建部署？接下来，本篇文章就通过一个 demo 逐步学习下如何做一个比较完整的前端工程化配置。
+> 目前接触到的团队项目中后台管理系统像 webpack 的相关配置已经被大佬封装起来了，而且后台管理系统默认使用最新版 Chrome 浏览器，不做过多的兼容处理，所以项目中关于工程化配置的部分就比较轻量。前台项目中会看到非常多的工程化配置文件，然而这些配置文件在项目搭建阶段基本上已经被大佬们按需配置好了，做起需求来也并不涉及这些工程化配置。但是详细学习前端工程化还是很有必要的，如果接手团队中历史遗留的老项目需要去重构然后实现前后端分离，那这些工程化配置如何做能将前端项目拆分出来并实现前端独立打包构建部署？接下来，本篇文章就通过一个 demo 逐步学习下如何做一个比较完整的前端工程化配置。
 
 ## 项目初始化
 
 1. demo 环境：node 14.18.1
 2. Gihutb 创建 repo
-3. clone到本地，执行`npm init -y`初始化
-4. 使用ESM规范，即 package.jso n中设置 type 为 module
+3. clone 到本地，执行`npm init -y`初始化
+4. 使用 ESM 规范，即 `package.json` 中设置 type 为 `module`
 5. 安装ts相关依赖：`npm i typescript -D`
 6. 执行`npx tsc --init`初始化 tsconfig.json
 
 ## tsconfig.json配置
 
+刚初始化生成的 tsconfig.json 文件中会有很多注释的配置项，按需配置即可。
 ```json
 {
   "compilerOptions": {
     /* Basic Options */
     "baseUrl": ".", // 模块解析根路径，默认为 tsconfig.json 位于的目录
     "rootDir": "src", // 编译解析根路径，默认为 tsconfig.json 位于的目录
-    "target": "ESNEXT", // 指定输出 ECMAScript 版本，默认为 es5
+    "target": "ESNext", // 指定输出 ECMAScript 版本，默认为 es5
     "module": "ESNext", // 指定输出模块规范，默认为 Commonjs
     "lib": ["ESNext", "DOM"], // 编译需要包含的 API，默认为 target 的默认值
     "outDir": "dist", // 编译输出文件夹路径，默认为源文件同级目录
@@ -33,7 +34,7 @@
     "forceConsistentCasingInFileNames": true, // 强制在文件名中使用一致的大小写，默认为 true
     "moduleResolution": "Node", // 指定使用哪种模块解析策略，默认为 Classic
   },
-  "include": ["src"] // 指定需要编译文件，默认当前目录下除了 exclude 之外的所有.ts, .d.ts,.tsx 文件
+  "include": ["src"] // 指定需要编译的文件，默认当前目录下除了 exclude 之外的所有.ts, .d.ts,.tsx 文件
 }
 ```
 
@@ -186,7 +187,9 @@ module.exports = {
 
 ## Husky
 
-> Husky是干嘛的？一个项目通常是团队合作，不能保证每个人在提交代码之前执行一遍 lint 校验，为了加强团队代码规范，可以借助 Husky + git hooks 来自动化校验，校验不通过时禁止提交。
+> 什么是 Git Hooks？是可以设置在 Git 生命周期的在某些事件下运行的脚本。这些事件包括提交的不同阶段，例如在提交之前（pre-commit），提交之后（post-commit）。这些功能非常有用，因为它们允许开发人员运行自定义代码任务，甚至运行其他自动化脚本来执行合适的代码规范及标准。
+
+> Husky 是干嘛的？一个项目通常是团队合作，项目中虽然配置了 Eslint 和 Prettier 但是不能保证每个开发者都能在提交代码之前执行一遍 lint 校验，为了加强团队代码规范，可以借助 Husky + git hooks 来自动化校验，校验不通过时禁止提交。
 
 1. 安装 husky：`npm i husky -D`
 2. 生成 .husky：`npx husky install`，在每次执行`npm install`时会自动启用 husky
@@ -519,7 +522,7 @@ jobs:
 
 ```json
 {
-  "branches": ["+([0-9])?(.{+([0-9]),x}).x", "main"], // 现在 github repo 的主分支为 main
+  "branches": ["+([0-9])?(.{+([0-9]),x}).x", "main"], // github repo 的主分支为 main
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
@@ -546,11 +549,11 @@ git checkout main
 git merge develop
 git push
 ```
-该提交会自动触发 测试 并 发布版本 ，自动创建 tag 和 changelog，可以看到 Github 主页和 NPM package 主页都有相关发布：
+该提交会自动触发 测试 并 发布版本，自动创建 tag 和 changelog，可以看到 Github 主页和 NPM package 主页都有相关发布：
 ![](images/cd-3.jpg)
 ![](images/cd-1.jpg)
 
-其中，NPM上的 package 包名称与项目 package.json 中 name 一致。
+NPM上的 package 包名称与项目 package.json 中 name 一致。
 
 9. 切回 develop 分支，创建一个自动更新依赖的workflow：dependabot.yml
 ```yml
@@ -565,7 +568,7 @@ updates:
       interval: 'daily'
 ```
 
-提交并查看 workflows 是否全部通过，再合并到 主分支 并提交，这个提交不会触发版本发布：
+提交并查看 workflows 是否全部通过，再合并到 主分支 并提交(这个提交不会触发版本发布)：
 ```sh
 git pull origin main
 git add .
@@ -578,7 +581,30 @@ git push
 ```
 ![](images/dependabot-1.jpg)
 
-在 Github Actions 最开始就出现了 `dependabot机器人升级依赖` 的字样，所以，Dependabot 是什么？干什么的？首先，在 repo 的 Setting-Security 部分可以找到 Dependabot：
+那什么情况下是可以触发的？
+- push 和 PR 到主分支上时触发版本发布
+- commit 前缀为feat、fix、perf会触发发布，否则跳过
+
+## 知识拓展
+
+1. `nvm、npm、cnpm、npx、pnpm` 之间是什么关系和区别？分别是在什么场景下使用的？
+
+包管理工具发展史：
+
+小结：
+- nvm：Node 版本管理工具
+- npm：Node 内置的包管理工具
+- cnpm：npm 从国外服务器下载安装依赖包，网络不好很容易失败，cnpm是 npmjs.org 的国内镜像源，通过` npm install -g cnpm --registry=https://registry.npm.taobao.org`安装，使用方式跟 npm 一样
+- npx：npm 5.2版本新增的一个执行命令，详细内容参考[npx使用教程](http://www.ruanyifeng.com/blog/2019/02/npx.html)
+- pnpm：支持 Monorepo 的现代包管理工具，集成了 npm 和 yarn 的优点
+
+[pnpm benchmarks](https://pnpm.io/zh/benchmarks)
+
+
+2. `npm run dev` 做了什么？
+
+
+3. 在 Github Actions 最开始就出现了 `dependabot机器人升级依赖` 的字样，所以，Dependabot 是什么？干什么的？首先，在 repo 的 Setting-Security 部分可以找到 Dependabot：
 ![](images/dependabot-3.jpg)
 
 里面有详细的文档去解释什么是Dependabot。我觉得简单理解就是在做check，主要提供以下3项能力：
@@ -589,8 +615,4 @@ git push
 - Stop using vulnerable dependencies and keep security updates: 这是启用 Dependabot security updates 后提供的能力，会找到没有漏洞的版本将漏洞修复掉然后给 repo 提一个PR，以实现自动 security updates。如果要实现自动修复，除了要在 Github 将 Dependabot security updates 功能 enable，还需要在项目的`.github/dependabot.yml`中制定配置项，主要指定哪些漏洞需要自动修复以及多久执行一次自动修复(参照上述 dependabot.yml 配置的内容)。
 - Keep all your dependencies updated：Dependabot 除了可以处理漏洞，还可以检测所使用的依赖中是否有可以更新的版本，如果有，就实现自动更新，所以在 repo 中启用了 Dependabot 之后，就可以保证 repo 中使用的依赖都是最新的。
 
-回到本demo相关的操作，第9步的git操作不会触发版本发布，那什么情况下是可以触发的？
-- push 和 PR 到主分支上时触发版本发布
-- commit 前缀为feat、fix、perf会触发发布，否则跳过
-
-在整个配置过程中有多次提到PR，到底什么是PR？
+3. 在整个配置过程中有多次提到 PR，到底什么是 PR ？

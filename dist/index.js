@@ -1,6 +1,5 @@
-"use strict";
 const testF = (a, b) => {
-    return a - b - c;
+    return a - b;
 };
-console.log(testF(1024, 28));
+export default testF;
 //# sourceMappingURL=index.js.map
