@@ -1,12 +1,12 @@
 # engineered-configuration-demo
 
-> 目前接触到的团队项目中后台管理系统像 webpack 的相关配置已经被大佬封装起来了，而且后台管理系统默认使用最新版 Chrome 浏览器，不做过多的兼容处理，所以项目中关于工程化配置的部分就比较轻量。前台项目中会看到非常多的工程化配置文件，然而这些配置文件在项目搭建阶段基本上已经被大佬们按需配置好了，做起需求来也并不涉及这些工程化配置。但是详细学习前端工程化还是很有必要的，如果接手团队中历史遗留的老项目需要去重构然后实现前后端分离，那这些工程化配置如何做能将前端项目拆分出来并实现前端独立打包构建部署？接下来，本篇文章就通过一个 demo 逐步学习下如何做一个比较完整的前端工程化配置。
+> 目前接触到的团队项目中后台管理系统像 webpack 的相关配置已经被大佬封装起来了，而且后台管理系统默认使用最新版 Chrome 浏览器，不做过多的兼容处理，所以项目中关于工程化配置的部分就比较轻量。前台项目中会看到非常多的工程化配置文件，然而这些配置文件在项目搭建阶段基本上已经被大佬们按需配置好了，做起需求来也并不涉及这些工程化配置。但是详细学习前端工程化还是很有必要的，如果接手团队中的老项目需要去重构然后实现前后端分离，那这些工程化配置如何做能将前端项目拆分出来并实现前端独立打包构建部署？接下来，本篇文章就通过一个 Github demo 逐步学习下如何做比较完整的前端工程化配置。
 
 ## 项目初始化
 
-1. demo 环境：node 14.18.1
-2. Gihutb 创建 repo
-3. clone 到本地，执行`npm init -y`初始化
+1. Node 版本：14.18.1
+2. Github 创建 repo
+3. git clone 到本地，执行`npm init -y`初始化
 4. 使用 ESM 规范，即 `package.json` 中设置 type 为 `module`
 5. 安装ts相关依赖：`npm i typescript -D`
 6. 执行`npx tsc --init`初始化 tsconfig.json
@@ -306,9 +306,9 @@ ci是啥？Angular 规范中的相关内容：
 
 ## Jest
 
-> 测试覆盖率100%！
+> 我们的目标：测试覆盖率100%！
 
-1. 安装 jest 和 类型声明 @types/jest，以及执行需要的 ts-node 和 ts-jest：`npm i jest @types/jest ts-node ts-jest -D`
+1. 安装 jest 和 类型声明 `@types/jest`，以及执行需要的 ts-node 和 ts-jest：`npm i jest @types/jest ts-node ts-jest -D`
 2. 初始化配置文件：`npx jest --init`，一路操作之后：
 ```
 ✔ Would you like to use Jest when running "test" script in "package.json"? … yes
@@ -355,11 +355,9 @@ test('The result should be 996', () => {
 
 ![](images/jest.jpg)
 
-执行完后会生成一个coverage目录，其中包含有测试报告。
+执行完后会生成一个coverage目录，其中包含有测试报告，可自行查看。
 
-7. 给 `__test__` 目录加上 lint 校验
-
-修改package.json：
+7. 给 `__test__` 目录加上 lint 校验，修改 package.json：
 ```js
 "scripts": {
   // ...
@@ -367,9 +365,7 @@ test('The result should be 996', () => {
 },
 ```
 
-此时，直接执行 `npm run lint` 将会报错，提示 `__tests__` 文件夹没有包含在 `tsconfig.json` 的 `include` 中，若添加到 include，输出的 dist 中就会包含测试相关的文件，实际上 dist 目录中并不需要测试文件。可以使用`typescript-eslint`官方给出的解决方案：
-
-新建一个 tsconfig.eslint.json 文件：
+此时，直接执行 `npm run lint` 将会报错，提示 `__tests__` 文件夹没有包含在 `tsconfig.json` 的 `include` 中，若添加到 `include`，输出的 dist 中就会包含测试相关的文件，实际上 dist 目录中并不需要测试文件。可以使用`typescript-eslint`官方给出的解决方案，新建一个 `tsconfig.eslint.json` 文件：
 ```json
 {
   "extends": "./tsconfig.json",
@@ -390,7 +386,7 @@ git commit -m 'test: add unit test'
 dist 目录中未包含测试代码，配置可正常生效。
 ## Gihub Actions
 
-> 通过 Github Actions 实现代码合并或推送到主分支，dependabot机器人升级依赖等动作，会自动触发测试和发布版本等一系列流程
+> 通过 Github Actions 实现代码合并或推送到主分支、dependabot 机器人升级依赖等动作，自动触发测试和发布版本等一系列流程。
 
 ### 代码自动测试
 
@@ -589,22 +585,14 @@ git push
 
 1. `nvm、npm、cnpm、npx、pnpm` 之间是什么关系和区别？分别是在什么场景下使用的？
 
-包管理工具发展史：
-
-小结：
 - nvm：Node 版本管理工具
 - npm：Node 内置的包管理工具
-- cnpm：npm 从国外服务器下载安装依赖包，网络不好很容易失败，cnpm是 npmjs.org 的国内镜像源，通过` npm install -g cnpm --registry=https://registry.npm.taobao.org`安装，使用方式跟 npm 一样
+- cnpm：npm 从国外服务器下载安装依赖包，网络不好时很容易失败，cnpm是 npmjs.org 的国内镜像源，通过` npm install -g cnpm --registry=https://registry.npm.taobao.org`安装，使用方式跟 npm 一样
 - npx：npm 5.2版本新增的一个执行命令，详细内容参考[npx使用教程](http://www.ruanyifeng.com/blog/2019/02/npx.html)
-- pnpm：支持 Monorepo 的现代包管理工具，集成了 npm 和 yarn 的优点
-
-[pnpm benchmarks](https://pnpm.io/zh/benchmarks)
+- pnpm：支持 Monorepo 的现代包管理工具，[pnpm benchmarks](https://pnpm.io/zh/benchmarks)
 
 
-2. `npm run dev` 做了什么？
-
-
-3. 在 Github Actions 最开始就出现了 `dependabot机器人升级依赖` 的字样，所以，Dependabot 是什么？干什么的？首先，在 repo 的 Setting-Security 部分可以找到 Dependabot：
+2. 在 Github Actions 最开始就出现了 `dependabot机器人升级依赖` 的字样，所以，Dependabot 是什么？干什么的？首先，在 repo 的 Setting-Security 部分可以找到 Dependabot：
 ![](images/dependabot-3.jpg)
 
 里面有详细的文档去解释什么是Dependabot。我觉得简单理解就是在做check，主要提供以下3项能力：
@@ -616,3 +604,34 @@ git push
 - Keep all your dependencies updated：Dependabot 除了可以处理漏洞，还可以检测所使用的依赖中是否有可以更新的版本，如果有，就实现自动更新，所以在 repo 中启用了 Dependabot 之后，就可以保证 repo 中使用的依赖都是最新的。
 
 3. 在整个配置过程中有多次提到 PR，到底什么是 PR ？
+
+MR(Merge Request)是日常工作中经常接触到的概念，是一个分支代码合并请求。团队内部使用 Gitlab 的工作流程大概是这样的：
+
+![](images/gitlab-2.jpg)
+
+从上图可以看出，MR 实际就是期望将团队成员的 feature 分支代码合并到主干分支。
+
+那 PR 是啥？PR 为 Pull Request 的缩写，平常使用 Github 写 demo 的时候有见到过：
+
+![](images/PR-1.jpg)
+
+Github 聚集了几千万开发者过亿的开源项目，如果想给别人的开源仓库贡献代码比如`vuejs/vue`，通常是先将其 Fork 到自己的 Github(`liumengge/vue`)，然后本地修改完成提交到`liumengge/vue`，最后提交 PR 等待别人合入代码。整个工作流程如下所示：
+
+![](images/PR-2.jpg)
+
+我想将自己修改的代码提交到作者的仓库为啥是 `pull request`？不应该是 `push request` 嘛？站在原作者的角度似乎就能说的通了，原作者是将别人修改的代码pull到他的代码仓库。
+
+
+以上 MR 和 PR 描述的是当前接触到的工作流程中涉及到的相关概念，那 MR 与 PR 的区别是什么呢？
+
+![](images/PR-MR-1.jpg)
+
+通过这个解释就很容易理解了，实际上就是在做相同的事情，只是不同的 站点 不同的 说法而已。
+
+## 参考资料
+
+- [npx使用教程](http://www.ruanyifeng.com/blog/2019/02/npx.html)
+- [【前端工程化】结合代码实践](https://juejin.cn/post/7033355647521554446#heading-24)
+- [前端工程化配置指南](https://juejin.cn/post/6971812117993226248#heading-11)
+- [从业务组件库看前端工程化](https://juejin.cn/post/7070022440079851527#heading-0)
+- [Pull request vs. merge request. What’s the difference？](https://gitprotect.io/blog/pull-request-vs-merge-request-whats-the-difference/)
